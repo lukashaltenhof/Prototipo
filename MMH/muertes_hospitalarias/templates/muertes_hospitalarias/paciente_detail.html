@@ -16,6 +16,8 @@
         <h1>Detalles de {{ object.nombre }}</h1>
         <ul class="list-group">
             <li class="list-group-item"><strong>RUT:</strong> {{ object.rut_paciente }}-{{ object.dv }}</li>
+            <li class="list-group-item"><strong>Género:</strong> {{ object.genero }}</li>
+            
             <li class="list-group-item"><strong>Fecha de Nacimiento:</strong> {{ object.fecha_nacimiento }}</li>
             <li class="list-group-item"><strong>Fecha de Muerte:</strong> {{ object.fecha_muerte }}</li>
             <li class="list-group-item"><strong>Causa de Muerte:</strong> {{ object.causa_muerte.nombre_causa }}</li>

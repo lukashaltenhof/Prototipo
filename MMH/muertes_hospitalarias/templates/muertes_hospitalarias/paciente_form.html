@@ -1,5 +1,5 @@
 {% extends 'muertes_hospitalarias/base.html' %}
-{% load form_tags %} <!-- Aquí cargas el filtro -->
+{% load form_tags %}
 
 {% block title %}Formulario de Paciente{% endblock %}
 
@@ -8,26 +8,21 @@
     <h1 class="mb-4">Formulario de Paciente</h1>
     <form method="POST">
         {% csrf_token %}
-
         <!-- Iteramos por los campos del formulario -->
         {% for field in form %}
             <div class="mb-3">
-                <!-- Mostramos la etiqueta con las clases de Bootstrap -->
                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-
-                <!-- Campo de entrada con las clases de Bootstrap -->
                 {{ field|add_class:"form-control" }}
                 {% if field.help_text %}
                     <div class="form-text">{{ field.help_text }}</div>
                 {% endif %}
-
-                <!-- Mostramos errores de validación si los hay -->
                 {% for error in field.errors %}
                     <div class="alert alert-danger mt-1">{{ error }}</div>
                 {% endfor %}
             </div>
         {% endfor %}
 
+       
         <!-- Botones de acción -->
         <button type="submit" class="btn btn-success">Guardar</button>
         <a href="{% url 'paciente-list' %}" class="btn btn-secondary">Cancelar</a>

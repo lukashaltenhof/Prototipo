@@ -11,6 +11,9 @@ class Hospital(models.Model):
     region = models.CharField(max_length=100)
     ciudad = models.CharField(max_length=100)
     
+    def __str__(self):
+        return self.nombre_hospital
+    
 class Medico(models.Model):
     rut_medico = models.IntegerField(primary_key=True)
     dv = models.CharField(max_length=1)
@@ -29,6 +32,7 @@ class CausaMuerte(models.Model):
         return self.nombre_causa
 
 class Paciente(models.Model):
+    # Campos existentes
     rut_paciente = models.IntegerField(primary_key=True)
     dv = models.CharField(max_length=1)
     nombre = models.CharField(max_length=100)
@@ -40,14 +44,21 @@ class Paciente(models.Model):
     medico = models.ForeignKey(Medico, on_delete=models.SET_NULL, null=True)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
 
+
+    # Nuevo campo de género
+    GENERO_CHOICES = [
+        ('masculino', 'Masculino'),
+        ('femenino', 'Femenino'),
+        ('otro', 'Otro'),
+    ]
+    genero = models.CharField(max_length=10, choices=GENERO_CHOICES, default='masculino')
+
     def __str__(self):
         return self.nombre
 
     def clean(self):
         # Validar que el RUT tenga entre 7 y 8 dígitos
         rut_str = str(self.rut_paciente)
-        
-        # Verifica que sea un número y que tenga longitud válida
         if not rut_str.isdigit() or not (7 <= len(rut_str) <= 8):
             raise ValidationError("El RUT debe tener entre 7 y 8 dígitos sin contar el DV.")
 
