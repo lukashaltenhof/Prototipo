@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+import re
 # Create your models here.
 
 class Hospital(models.Model):
@@ -40,6 +42,14 @@ class Paciente(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def clean(self):
+        # Validar que el RUT tenga entre 7 y 8 dígitos
+        rut_str = str(self.rut_paciente)
+        
+        # Verifica que sea un número y que tenga longitud válida
+        if not rut_str.isdigit() or not (7 <= len(rut_str) <= 8):
+            raise ValidationError("El RUT debe tener entre 7 y 8 dígitos sin contar el DV.")
 
 class InformeMuerteHospitalaria(models.Model):
     id_informe = models.AutoField(primary_key=True)

@@ -5,12 +5,15 @@ from .models import Paciente
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
+from .forms import PacienteForm
+from django.core.paginator import Paginator
 
 
 # Listar los pacientes
 class PacienteListView(ListView):
     model = Paciente
     template_name = 'muertes_hospitalarias/paciente_list.html'
+    paginate_by = 10  # Número de pacientes por página
 
     def get_queryset(self):
         queryset = super().get_queryset()  # Obtiene todos los pacientes
@@ -25,16 +28,32 @@ class PacienteListView(ListView):
 # Crear un nuevo paciente
 class PacienteCreateView(CreateView):
     model = Paciente
+    form_class = PacienteForm  # Usa tu formulario personalizado
     template_name = 'muertes_hospitalarias/paciente_form.html'
-    fields = '__all__'
     success_url = reverse_lazy('paciente-list')
+
+    def form_valid(self, form):
+        # Aquí puedes añadir lógica adicional antes de guardar
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Maneja el caso donde el formulario es inválido
+        return self.render_to_response({'form': form})
 
 # Editar un paciente
 class PacienteUpdateView(UpdateView):
     model = Paciente
+    form_class = PacienteForm  # Usa tu formulario personalizado
     template_name = 'muertes_hospitalarias/paciente_form.html'
-    fields = '__all__'
     success_url = reverse_lazy('paciente-list')
+
+    def form_valid(self, form):
+        # Aquí puedes añadir lógica adicional antes de guardar
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Maneja el caso donde el formulario es inválido
+        return self.render_to_response({'form': form})
 
 # Eliminar un paciente
 class PacienteDeleteView(DeleteView):
