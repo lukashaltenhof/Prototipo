@@ -1,9 +1,32 @@
 {% extends 'muertes_hospitalarias/base.html' %}
 {% load custom_filters %}
+
 {% block title %}Análisis Estadístico{% endblock %}
 
 {% block content %}
 <h1>Análisis Estadístico</h1>
+<p id="fecha-hora"></p>
+
+<script>
+    // Función para mostrar la fecha y hora actual
+    function mostrarFechaHora() {
+        const ahora = new Date(); // Obtiene la fecha y hora actuales
+        const opciones = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: false 
+        };
+        const fechaHoraFormateada = ahora.toLocaleString('es-CL', opciones); // Formatea la fecha y hora
+        document.getElementById('fecha-hora').textContent = fechaHoraFormateada; // Muestra en el HTML
+    }
+
+    // Llama a la función de mostrarFechaHora cada segundo
+    setInterval(mostrarFechaHora, 1000); // 1000 milisegundos = 1 segundo
+</script>
 <p>Total de Pacientes: {{ total_pacientes }}</p>
 
 <h2>Muertes por Género</h2>
@@ -85,4 +108,9 @@
         {% endfor %}
     </tbody>
 </table>
+
+<form method="get" action="{% url 'pdf_view' %}">
+    <button type="submit" style="margin-top: 20px;">Descargar PDF</button>
+</form>
+
 {% endblock %}

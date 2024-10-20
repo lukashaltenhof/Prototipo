@@ -5,13 +5,17 @@ from .models import Paciente
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
 from .forms import PacienteForm
-from io import BytesIO
-from xhtml2pdf import pisa
+
+
 from django.template.loader import get_template
 from django.http import HttpResponse
-from django.db.models import Count, Avg
+from django.db.models import Count
 from collections import defaultdict
 from datetime import date
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from django.utils import timezone
 
 # Listar los pacientes
 class PacienteListView(ListView):
@@ -99,14 +103,6 @@ def logout_view(request):
     logout(request)  # Cierra la sesión del usuario
     return redirect('login')  # Redirige a la página de login después de cerrar sesión
 
-def render_to_pdf(template_src, context_dict={}):
-    template = get_template(template_src)
-    html = template.render(context_dict)
-    result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-    return None
 
 def analisis_estadistico(request):
     # Total de pacientes
@@ -222,3 +218,52 @@ def calcular_porcentaje_por_tramo_edad(pacientes, total_pacientes):
         }
         for tramo, cantidad in tramos_edad.items()
     ]
+
+def render_to_pdf(template_src, context_dict={}):
+    template = render_to_string(template_src, context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="analisis_estadistico.pdf"'
+    pisa_status = pisa.CreatePDF(template, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF')
+    return response
+
+def pdf_view(request):
+    # Obtiene la fecha y hora actual
+    fecha_hora_actual = timezone.now()
+
+    # Llama a la función que ya calcula los datos
+    total_pacientes = Paciente.objects.count()
+
+    muertes_por_genero = Paciente.objects.values('genero').annotate(
+        count=Count('rut_paciente')
+    ).annotate(
+        porcentaje=(Count('rut_paciente') * 100.0 / total_pacientes)
+    )
+
+    muertes_por_hospital = Paciente.objects.values('hospital__nombre_hospital').annotate(
+        count=Count('rut_paciente')
+    ).annotate(
+        porcentaje=(Count('rut_paciente') * 100.0 / total_pacientes)
+    )
+
+    muertes_por_causa = Paciente.objects.values('causa_muerte__nombre_causa').annotate(
+        count=Count('rut_paciente')
+    ).annotate(
+        porcentaje=(Count('rut_paciente') * 100.0 / total_pacientes)
+    )
+
+    # Calcular porcentajes por tramo de edad
+    porcentajes_tramo_edad = calcular_porcentaje_por_tramo_edad(Paciente.objects.all(), total_pacientes)
+
+    # Preparar el contexto para la plantilla
+    context = {
+        'fecha_hora_actual': fecha_hora_actual,  # Añade la fecha y hora al contexto
+        'muertes_por_genero': muertes_por_genero,
+        'muertes_por_hospital': muertes_por_hospital,
+        'muertes_por_causa': muertes_por_causa,
+        'porcentajes_tramo_edad': porcentajes_tramo_edad,
+        'total_pacientes': total_pacientes,
+    }
+    
+    return render_to_pdf('muertes_hospitalarias/analisis_estadistico.html', context)

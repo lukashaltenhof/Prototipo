@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Análisis Estadístico</title>
+    <style>
+        /* Estilos CSS para el PDF */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #000;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Análisis Estadístico</h1>
+    <!-- Mostrar fecha y hora actual -->
+    <p>Fecha y Hora: {{ fecha_hora_actual|date:"d/m/Y H:i:s" }}</p>  <!-- Muestra la fecha y hora -->
+
+    <p>Total de Pacientes: {{ total_pacientes }}</p>
+
+    <h2>Muertes por Género</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Género</th>
+                <th>Total</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in muertes_por_genero %}
+            <tr>
+                <td>{{ item.genero }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.porcentaje|floatformat:2 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Muertes por Hospital</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Hospital</th>
+                <th>Total</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in muertes_por_hospital %}
+            <tr>
+                <td>{{ item.hospital__nombre_hospital }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.porcentaje|floatformat:2 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Muertes por Causa</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Causa de Muerte</th>
+                <th>Total</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in muertes_por_causa %}
+            <tr>
+                <td>{{ item.causa_muerte__nombre_causa }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.porcentaje|floatformat:2 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Porcentajes por Tramo de Edad</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tramo de Edad</th>
+                <th>Total</th>
+                <th>Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in porcentajes_tramo_edad %}
+            <tr>
+                <td>{{ item.tramo }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.porcentaje|floatformat:2 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

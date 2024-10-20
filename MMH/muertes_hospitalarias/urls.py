@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PacienteListView, PacienteCreateView, PacienteUpdateView, PacienteDeleteView, login_view, PacienteDetailView, logout_view, analisis_estadistico
+from .views import PacienteListView, PacienteCreateView, PacienteUpdateView, PacienteDeleteView, login_view, PacienteDetailView, logout_view, analisis_estadistico, pdf_view
 from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('paciente/<int:pk>/', PacienteDetailView.as_view(), name='paciente-detail'),
     path('analisis/', analisis_estadistico, name='analisis'),
+    path('analisis/pdf/', pdf_view, name='pdf_view'),  # URL para generar el PDF
     
 ]
