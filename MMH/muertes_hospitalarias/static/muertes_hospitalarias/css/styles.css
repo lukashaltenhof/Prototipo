@@ -62,3 +62,27 @@ form {
 .alert {
     margin-top: 20px;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #000000;
+}
+
+tr:nth-child(even) {
+    background-color: #000000; /* Color de fondo alternativo para filas */
+}
+
+tr:hover {
+    background-color: #000000; /* Color de fondo al pasar el ratón */
+}

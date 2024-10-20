@@ -7,30 +7,82 @@
 <p>Total de Pacientes: {{ total_pacientes }}</p>
 
 <h2>Muertes por Género</h2>
-<ul>
-    {% for item in muertes_por_genero %}
-        <li>{{ item.genero }}: {{ item.count }} ({{ item.porcentaje|floatformat:2 }}%)</li>
-    {% endfor %}
-</ul>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <thead>
+        <tr style="background-color: #0000008a;">
+            <th style="border: 1px solid #ddd; padding: 8px;">Género</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Porcentaje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in muertes_por_genero %}
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.genero }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.count }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.porcentaje|floatformat:2 }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 <h2>Muertes por Hospital</h2>
-<ul>
-    {% for item in muertes_por_hospital %}
-        <li>{{ item.hospital__nombre_hospital }}: {{ item.count }} ({{ item.porcentaje|floatformat:2 }}%)</li>
-    {% endfor %}
-</ul>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <thead>
+        <tr style="background-color: #0000007e;">
+            <th style="border: 1px solid #ddd; padding: 8px;">Hospital</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Porcentaje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in muertes_por_hospital %}
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.hospital__nombre_hospital }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.count }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.porcentaje|floatformat:2 }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 <h2>Muertes por Causa</h2>
-<ul>
-    {% for item in muertes_por_causa %}
-        <li>{{ item.causa_muerte__nombre_causa }}: {{ item.count }} ({{ item.porcentaje|floatformat:2 }}%)</li>
-    {% endfor %}
-</ul>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <thead>
+        <tr style="background-color: #0000008a;">
+            <th style="border: 1px solid #ddd; padding: 8px;">Causa de Muerte</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Porcentaje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in muertes_por_causa %}
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.causa_muerte__nombre_causa }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.count }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.porcentaje|floatformat:2 }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 <h2>Porcentajes por Tramo de Edad</h2>
-<ul>
-    {% for item in porcentajes_tramo_edad %}
-        <li>{{ item.tramo }}: {{ item.cantidad }} ({{ item.porcentaje|floatformat:2 }}%)</li>
-    {% endfor %}
-</ul>
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <thead>
+        <tr style="background-color: #0000007e;">
+            <th style="border: 1px solid #ddd; padding: 8px;">Tramo de Edad</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Porcentaje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in porcentajes_tramo_edad %}
+        <tr>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.tramo }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.cantidad }}</td>
+            <td style="border: 1px solid #ddd; padding: 8px;">{{ item.porcentaje|floatformat:2 }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
