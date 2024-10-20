@@ -1,0 +1,36 @@
+{% extends 'muertes_hospitalarias/base.html' %}
+{% load custom_filters %}
+{% block title %}Análisis Estadístico{% endblock %}
+
+{% block content %}
+<h1>Análisis Estadístico</h1>
+<p>Total de Pacientes: {{ total_pacientes }}</p>
+
+<h2>Muertes por Género</h2>
+<ul>
+    {% for item in muertes_por_genero %}
+        <li>{{ item.genero }}: {{ item.count }} ({{ item.porcentaje|floatformat:2 }}%)</li>
+    {% endfor %}
+</ul>
+
+<h2>Muertes por Hospital</h2>
+<ul>
+    {% for item in muertes_por_hospital %}
+        <li>{{ item.hospital__nombre_hospital }}: {{ item.count }} ({{ item.porcentaje|floatformat:2 }}%)</li>
+    {% endfor %}
+</ul>
+
+<h2>Muertes por Causa</h2>
+<ul>
+    {% for item in muertes_por_causa %}
+        <li>{{ item.causa_muerte__nombre_causa }}: {{ item.count }} ({{ item.porcentaje|floatformat:2 }}%)</li>
+    {% endfor %}
+</ul>
+
+<h2>Porcentajes por Tramo de Edad</h2>
+<ul>
+    {% for item in porcentajes_tramo_edad %}
+        <li>{{ item.tramo }}: {{ item.cantidad }} ({{ item.porcentaje|floatformat:2 }}%)</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,19 +1,43 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-import re
-# Create your models here.
+from datetime import date
 
+
+# Crear modelo para Region
+class Region(models.Model):
+    nombre_region = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre_region
+
+# Crear modelo para Ciudad
+class Ciudad(models.Model):
+    nombre_ciudad = models.CharField(max_length=100)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre_ciudad
+
+# Crear modelo para Comuna
+class Comuna(models.Model):
+    nombre_comuna = models.CharField(max_length=100)
+    ciudad = models.ForeignKey(Ciudad, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre_comuna
+
+# Modificar modelo Hospital para incluir comuna
 class Hospital(models.Model):
     id_hospital = models.AutoField(primary_key=True)
     nombre_hospital = models.CharField(max_length=100)
-    comuna = models.CharField(max_length=100)
-    region = models.CharField(max_length=100)
-    ciudad = models.CharField(max_length=100)
+    comuna = models.ForeignKey(Comuna, on_delete=models.CASCADE)  # Cambiar a ForeignKey de Comuna
     
+
     def __str__(self):
         return self.nombre_hospital
-    
+
+# Continuar con los demás modelos
 class Medico(models.Model):
     rut_medico = models.IntegerField(primary_key=True)
     dv = models.CharField(max_length=1)
@@ -26,13 +50,12 @@ class Medico(models.Model):
 
 class CausaMuerte(models.Model):
     id_causa_muerte = models.AutoField(primary_key=True)
-    nombre_causa = models.CharField(max_length=50, null=True)  
+    nombre_causa = models.CharField(max_length=50, null=True)
 
     def __str__(self):
         return self.nombre_causa
 
 class Paciente(models.Model):
-    # Campos existentes
     rut_paciente = models.IntegerField(primary_key=True)
     dv = models.CharField(max_length=1)
     nombre = models.CharField(max_length=100)
@@ -44,8 +67,6 @@ class Paciente(models.Model):
     medico = models.ForeignKey(Medico, on_delete=models.SET_NULL, null=True)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE)
 
-
-    # Nuevo campo de género
     GENERO_CHOICES = [
         ('masculino', 'Masculino'),
         ('femenino', 'Femenino'),
@@ -57,10 +78,17 @@ class Paciente(models.Model):
         return self.nombre
 
     def clean(self):
-        # Validar que el RUT tenga entre 7 y 8 dígitos
         rut_str = str(self.rut_paciente)
         if not rut_str.isdigit() or not (7 <= len(rut_str) <= 8):
             raise ValidationError("El RUT debe tener entre 7 y 8 dígitos sin contar el DV.")
+
+    def calcular_edad(self):
+        """Calcula la edad del paciente en años."""
+        if self.fecha_nacimiento:
+            today = date.today()
+            edad = today.year - self.fecha_nacimiento.year - ((today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day))
+            return edad
+        return None  # Retorna None si no hay fecha de nacimiento
 
 class InformeMuerteHospitalaria(models.Model):
     id_informe = models.AutoField(primary_key=True)
@@ -77,10 +105,9 @@ class InformeMuerteHospitalaria(models.Model):
     def __str__(self):
         return f"Informe de {self.nombre_paciente}"
 
-
 class PerfilUsuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    rol = models.CharField(max_length=20)  # Por ejemplo, 'recopilador', 'administrador', etc.
+    rol = models.CharField(max_length=20)
 
     def __str__(self):
         return self.user.username
