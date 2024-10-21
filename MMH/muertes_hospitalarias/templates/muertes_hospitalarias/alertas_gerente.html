@@ -1,0 +1,21 @@
+{% extends 'muertes_hospitalarias/base.html' %}
+{% block title %}Notificaciones de Alertas{% endblock %}
+
+{% block content %}
+<h1>Alertas</h1>
+
+{% if alertas %}
+    <ul>
+    {% for alerta in alertas %}
+        <li>
+            <strong>{{ alerta.fecha|date:"d/m/Y H:i" }}:</strong> {{ alerta.mensaje }}
+            {% if not alerta.leido %}
+            <span style="color: red;">(No leído)</span>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay alertas pendientes.</p>
+{% endif %}
+{% endblock %}

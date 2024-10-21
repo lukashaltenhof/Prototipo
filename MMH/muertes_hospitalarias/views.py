@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
-from .models import Paciente
+from .models import Paciente, Medico, Hospital, Alerta, CausaMuerte
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
 from .forms import PacienteForm
-
+from django.contrib.auth.decorators import login_required
 
 from django.template.loader import get_template
 from django.http import HttpResponse
@@ -16,6 +16,11 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import get_object_or_404
+from .forms import BuscarPacienteForm
 
 # Listar los pacientes
 class PacienteListView(ListView):
@@ -90,6 +95,8 @@ def login_view(request):
             # Verificar si el usuario pertenece al grupo 'analista'
             elif user.groups.filter(name='analista').exists():
                 return redirect('analisis')  # Redirige a otra vista para analista
+            elif user.groups.filter(name='gerente').exists():
+                return redirect('alertas_gerente')  # Redirige a otra vista para analista
             else:
                 # Si el usuario no pertenece a ningún grupo conocido
                 return redirect('default-vista')  # Cambia esto según tu lógica
@@ -267,3 +274,98 @@ def pdf_view(request):
     }
     
     return render_to_pdf('muertes_hospitalarias/analisis_estadistico.html', context)
+
+
+def generar_alerta_anomalia(request):
+    total_pacientes = Paciente.objects.count()
+    umbral = 70  # Porcentaje límite
+
+    causas_muerte = Paciente.objects.values('causa_muerte__nombre_causa').annotate(
+        count=Count('rut_paciente')
+    ).annotate(
+        porcentaje=(Count('rut_paciente') * 100.0 / total_pacientes)
+    ).filter(porcentaje__gt=umbral)
+
+    if causas_muerte.exists():
+        gerente = User.objects.get(username='gerente1')
+        for causa in causas_muerte:
+            alerta = Alerta(
+                usuario=gerente,
+                mensaje=f"Más del {umbral}% de pacientes tienen la causa de muerte: {causa['causa_muerte__nombre_causa']}.",
+                leido=False
+            )
+            alerta.save()
+            messages.warning(request, f"Se ha generado una alerta: {alerta.mensaje}")
+
+    else:
+        messages.info(request, "No se encontraron anomalías en las causas de muerte.")
+
+    return redirect('analisis_estadistico')  # Redirige a la vista del análisis
+
+def alertas_gerente_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    alertas = Alerta.objects.filter(usuario=request.user).order_by('-fecha')
+
+    return render(request, 'muertes_hospitalarias/alertas_gerente.html', {
+        'alertas': alertas,
+    })
+
+
+def buscar_paciente(request):
+    informe = None  # Para almacenar el informe
+    if request.method == "POST":
+        form = BuscarPacienteForm(request.POST)
+        if form.is_valid():
+            buscar_por = form.cleaned_data['buscar_por']
+            valor = form.cleaned_data['valor']
+
+            if buscar_por == 'rut':
+                try:
+                    paciente = Paciente.objects.get(rut_paciente=valor)
+                except Paciente.DoesNotExist:
+                    paciente = None
+            else:  # buscar por nombre
+                paciente = Paciente.objects.filter(nombre__icontains=valor).first()
+
+            if paciente:
+                # Calcular edad
+                edad = paciente.calcular_edad()
+                informe = {
+                    'nombre': paciente.nombre,
+                    'rut': f"{paciente.rut_paciente}-{paciente.dv}",
+                    'causa_muerte': paciente.causa_muerte.nombre_causa if paciente.causa_muerte else 'N/A',
+                    'fecha_nacimiento': paciente.fecha_nacimiento,
+                    'fecha_muerte': paciente.fecha_muerte,
+                    'hora_muerte': paciente.hora_muerte,
+                    'detalles_muerte': paciente.detalles_muerte,
+                    'genero': paciente.genero,
+                    'hospital': paciente.hospital.nombre_hospital,
+                    'medico': paciente.medico.nombre if paciente.medico else 'N/A',
+                    'rut_medico': f"{paciente.medico.rut_medico}-{paciente.medico.dv}" if paciente.medico else 'N/A',
+                    'edad': edad,
+                }
+    else:
+        form = BuscarPacienteForm()
+
+    return render(request, 'buscar_paciente.html', {'form': form, 'informe': informe})
+
+
+def generar_pdf_informe(request):
+    # Asegúrate de que el informe esté disponible en la sesión o de alguna manera accesible
+    informe = request.session.get('informe', None)
+
+    if informe:
+        # Cargar la plantilla y renderizar el informe
+        html = render_to_string('informe_template.html', {'informe': informe})
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
+        pisa_status = pisa.CreatePDF(html, dest=response)
+
+        if pisa_status.err:
+            return HttpResponse('Error al generar PDF')
+
+        return response
+
+    return redirect('buscar_paciente')

@@ -90,20 +90,8 @@ class Paciente(models.Model):
             return edad
         return None  # Retorna None si no hay fecha de nacimiento
 
-class InformeMuerteHospitalaria(models.Model):
-    id_informe = models.AutoField(primary_key=True)
-    nombre_paciente = models.CharField(max_length=100)
-    rut_paciente = models.IntegerField()
-    dv = models.CharField(max_length=1)
-    causa_muerte = models.CharField(max_length=50)
-    rut_medico = models.CharField(max_length=10)
-    nombre_medico = models.CharField(max_length=100)
-    nombre_hospital = models.CharField(max_length=100)
-    fecha_muerte = models.DateField()
-    detalles_muerte = models.CharField(max_length=255, null=True, blank=True)
 
-    def __str__(self):
-        return f"Informe de {self.nombre_paciente}"
+
 
 class PerfilUsuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -111,3 +99,12 @@ class PerfilUsuario(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class Alerta(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    mensaje = models.TextField()
+    leido = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Alerta para {self.usuario.username}: {self.mensaje}"

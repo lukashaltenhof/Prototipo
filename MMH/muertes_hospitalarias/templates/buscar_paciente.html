@@ -1,0 +1,31 @@
+{% extends 'muertes_hospitalarias/base.html' %}
+
+{% block title %}Listar Informes{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Buscar</button>
+</form>
+
+{% if informe %}
+    <h2>Informe del Paciente</h2>
+    <table>
+        <tr><td>Nombre:</td><td>{{ informe.nombre }}</td></tr>
+        <tr><td>RUT:</td><td>{{ informe.rut }}</td></tr>
+        <tr><td>Causa de Muerte:</td><td>{{ informe.causa_muerte }}</td></tr>
+        <tr><td>Fecha de Nacimiento:</td><td>{{ informe.fecha_nacimiento }}</td></tr>
+        <tr><td>Fecha de Muerte:</td><td>{{ informe.fecha_muerte }}</td></tr>
+        <tr><td>Hora de Muerte:</td><td>{{ informe.hora_muerte }}</td></tr>
+        <tr><td>Detalles de Muerte:</td><td>{{ informe.detalles_muerte }}</td></tr>
+        <tr><td>Género:</td><td>{{ informe.genero }}</td></tr>
+        <tr><td>Hospital:</td><td>{{ informe.hospital }}</td></tr>
+        <tr><td>Médico:</td><td>{{ informe.medico }}</td></tr>
+        <tr><td>RUT Médico:</td><td>{{ informe.rut_medico }}</td></tr>
+        <tr><td>Edad:</td><td>{{ informe.edad }}</td></tr>
+    </table>
+    <a href="{% url 'generar_pdf_informe' %}">Generar PDF</a>
+{% endif %}
+
+{% endblock %}
