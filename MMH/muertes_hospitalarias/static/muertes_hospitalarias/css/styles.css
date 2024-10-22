@@ -9,8 +9,6 @@ body {
     background-position: center; /* Centra la imagen */
     background-repeat: no-repeat; /* No repite la imagen */
     background-attachment: fixed; /* El fondo se mantiene fijo al hacer scroll */
-
-
 }
 
 /* Navbar */
@@ -22,39 +20,54 @@ body {
     font-weight: bold;
 }
 
-
-
 /* Contenido principal */
 .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.452);
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.466); /* Fondo más blanco */
+    border-radius: 10px; /* Esquinas redondeadas */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra más prominente */
 }
 
-/* Formulario */
-form {
-    margin-top: 20px;
+/* Estilos de encabezados */
+h1 {
+    text-align: center; /* Centrar título */
+    color: #1fb38e; /* Color verde */
+    margin-bottom: 20px; /* Espacio inferior */
+    font-size: 2.5em; /* Tamaño de fuente grande */
 }
 
-.form-label {
-    font-weight: bold;
+/* Sección de filtros */
+.filters {
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo para la sección de filtros */
+    padding: 15px; /* Espaciado interno */
+    border-radius: 5px; /* Esquinas redondeadas */
+    margin-bottom: 20px; /* Espacio inferior */
 }
 
-.btn-primary {
-    background-color: #1fb38e;
-    border: none;
+.filters form {
+    display: flex; /* Uso de flexbox para alinear elementos */
+    flex-direction: column; /* Elementos en columna */
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
+.filters button {
+    margin-top: 10px; /* Espacio superior */
+    padding: 10px; /* Espaciado interno */
+    background-color: #1fb38e; /* Color del botón */
+    border: none; /* Sin borde */
+    color: white; /* Color del texto */
+    border-radius: 5px; /* Esquinas redondeadas */
+    cursor: pointer; /* Cursor pointer al pasar sobre el botón */
 }
 
-/* Alertas */
-.alert {
-    margin-top: 20px;
+.filters button:hover {
+    background-color: #0056b3; /* Color al pasar el ratón */
+}
+
+/* Sección de resultados */
+.results {
+    margin-top: 20px; /* Espacio superior */
 }
 
 table {
@@ -65,7 +78,41 @@ table {
 
 th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 12px; /* Espaciado interno más amplio */
     text-align: left;
 }
 
+th {
+    background-color: #d49230; /* Color de fondo de las cabeceras */
+    color: white; /* Color del texto de las cabeceras */
+}
+
+tr:nth-child(even) {
+    background-color: rgba(240, 240, 240, 0.5); /* Color de fondo alternativo */
+}
+
+tr:hover {
+    background-color: rgba(200, 200, 200, 0.5); /* Color de fondo al pasar el ratón */
+}
+
+/* Estilo para mensajes sin resultados */
+.no-results {
+    text-align: center;
+    color: #dc3545; /* Color rojo */
+    font-size: 1.2em; /* Tamaño de fuente más grande */
+}
+
+/* Estilo para el botón de descargar */
+button[type="submit"] {
+    margin-top: 20px; /* Espacio superior */
+    padding: 10px; /* Espaciado interno */
+    background-color: #007bff; /* Color de fondo */
+    border: none; /* Sin borde */
+    color: white; /* Color del texto */
+    border-radius: 5px; /* Esquinas redondeadas */
+    cursor: pointer; /* Cursor pointer al pasar sobre el botón */
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3; /* Color al pasar el ratón */
+}

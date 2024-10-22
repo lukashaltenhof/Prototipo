@@ -10,7 +10,7 @@
             <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit">Buscar</button>
+                <button type="submit" class="btn-primary">Buscar</button>
             </form>
         </div>
 
@@ -54,7 +54,7 @@
 
                 <!-- Botón para descargar el PDF -->
                 <form action="{% url 'generar_pdf_informe' %}" method="get">
-                    <button type="submit">Descargar Informe en PDF</button>
+                    <button type="submit" class="btn-primary">Descargar Informe en PDF</button>
                 </form>
 
             {% else %}

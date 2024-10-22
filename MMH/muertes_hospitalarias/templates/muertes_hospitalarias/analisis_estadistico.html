@@ -7,6 +7,11 @@
 <h1>Análisis Estadístico</h1>
 <p id="fecha-hora"></p>
 
+<!-- Botón para ir a la página buscar_paciente -->
+<a href="{% url 'buscar_paciente' %}" style="display: inline-block; margin-bottom: 20px; padding: 10px 15px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    Generar informe por variable de estudio
+</a>
+
 <script>
     // Función para mostrar la fecha y hora actual
     function mostrarFechaHora() {
@@ -26,6 +31,7 @@
 
     mostrarFechaHora(); // Llama a la función al cargar la página
 </script>
+
 <p>Total de Pacientes: {{ total_pacientes }}</p>
 
 <h2>Muertes por Género</h2>
