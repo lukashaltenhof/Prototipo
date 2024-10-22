@@ -16,6 +16,6 @@ urlpatterns = [
     path('analisis/pdf/', pdf_view, name='pdf_view'),  # URL para generar el PDF
     path('alertas-gerente/', views.alertas_gerente_view, name='alertas_gerente'),
      path('buscar/', buscar_paciente, name='buscar_paciente'),
-    path('generar_pdf_informe/', generar_pdf_informe, name='generar_pdf_informe'),
+    path('muertes-hospitalarias/pdf/', views.generar_pdf_informe, name='generar_pdf_informe'),
     
 ]

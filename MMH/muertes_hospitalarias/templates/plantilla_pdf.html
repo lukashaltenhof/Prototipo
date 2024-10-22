@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe de Pacientes</title>
+    
+</head>
+<body>
+    <h1>Informe de Pacientes</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>RUT</th>
+                <th>Causa de Muerte</th>
+                <th>Fecha de Nacimiento</th>
+                <th>Fecha de Muerte</th>
+                <th>Género</th>
+                <th>Hospital</th>
+                <th>Médico</th>
+                <th>Edad</th>
+                <th>Detalles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paciente in informe %}
+            <tr>
+                <td>{{ paciente.nombre }}</td>
+                <td>{{ paciente.rut }}</td>
+                <td>{{ paciente.causa_muerte }}</td>
+                <td>{{ paciente.fecha_nacimiento }}</td>
+                <td>{{ paciente.fecha_muerte }}</td>
+                <td>{{ paciente.genero }}</td>
+                <td>{{ paciente.hospital }}</td>
+                <td>{{ paciente.medico }}</td>
+                <td>{{ paciente.edad }}</td>
+                <td>{{ paciente.detalles_muerte }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Informe generado el {{ now|date:"d/m/Y H:i" }}</p>
+    </div>
+</body>
+</html>

@@ -21,6 +21,8 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from .forms import BuscarPacienteForm
+from io import BytesIO
+from django.utils import timezone
 
 # Listar los pacientes
 class PacienteListView(ListView):
@@ -314,58 +316,118 @@ def alertas_gerente_view(request):
 
 
 def buscar_paciente(request):
-    informe = None  # Para almacenar el informe
+    informes = None  # Para almacenar los informes
+    if request.method == "POST":
+        form = BuscarPacienteForm(request.POST)
+        if form.is_valid():
+            buscar_por = form.cleaned_data['buscar_por']
+            valor = form.cleaned_data['valor']  # Esto solo se usa para 'rut' o 'nombre'
+            causa_muerte = form.cleaned_data['causa_muerte']
+            hospital = form.cleaned_data['hospital']
+
+            if buscar_por == 'rut':
+                if valor:  # Asegurarse de que el valor no esté vacío
+                    pacientes = Paciente.objects.filter(rut_paciente=valor)
+                else:
+                    pacientes = None
+            elif buscar_por == 'nombre':
+                if valor:  # Asegurarse de que el valor no esté vacío
+                    pacientes = Paciente.objects.filter(nombre__icontains=valor)
+                else:
+                    pacientes = None
+            elif buscar_por == 'causa_muerte':
+                if causa_muerte:  # Usar el valor del dropdown (ID)
+                    pacientes = Paciente.objects.filter(causa_muerte=causa_muerte)
+                else:
+                    pacientes = None
+            elif buscar_por == 'hospital':
+                if hospital:  # Usar el valor del dropdown (ID)
+                    pacientes = Paciente.objects.filter(hospital=hospital)
+                else:
+                    pacientes = None
+            else:
+                pacientes = None
+
+            if pacientes:
+                # Crear informes para cada paciente encontrado
+                informes = []
+                for paciente in pacientes:
+                    edad = paciente.calcular_edad()
+                    informe = {
+                        'nombre': paciente.nombre,
+                        'rut': f"{paciente.rut_paciente}-{paciente.dv}",
+                        'causa_muerte': paciente.causa_muerte.nombre_causa if paciente.causa_muerte else 'N/A',
+                        'fecha_nacimiento': paciente.fecha_nacimiento,
+                        'fecha_muerte': paciente.fecha_muerte,
+                        'hora_muerte': paciente.hora_muerte,
+                        'detalles_muerte': paciente.detalles_muerte,
+                        'genero': paciente.genero,
+                        'hospital': paciente.hospital.nombre_hospital,
+                        'medico': paciente.medico.nombre if paciente.medico else 'N/A',
+                        'rut_medico': f"{paciente.medico.rut_medico}-{paciente.medico.dv}" if paciente.medico else 'N/A',
+                        'edad': edad,
+                    }
+                    informes.append(informe)
+    else:
+        form = BuscarPacienteForm()
+
+    return render(request, 'buscar_paciente.html', {'form': form, 'informes': informes})
+
+
+
+def generar_pdf_informe(request):
+    informe = []  # Lista para almacenar los pacientes filtrados
+
     if request.method == "POST":
         form = BuscarPacienteForm(request.POST)
         if form.is_valid():
             buscar_por = form.cleaned_data['buscar_por']
             valor = form.cleaned_data['valor']
 
+            # Filtrar pacientes según el campo seleccionado
             if buscar_por == 'rut':
-                try:
-                    paciente = Paciente.objects.get(rut_paciente=valor)
-                except Paciente.DoesNotExist:
-                    paciente = None
-            else:  # buscar por nombre
-                paciente = Paciente.objects.filter(nombre__icontains=valor).first()
+                pacientes = Paciente.objects.filter(rut_paciente=valor)
+            elif buscar_por == 'nombre':
+                pacientes = Paciente.objects.filter(nombre__icontains=valor)
+            elif buscar_por == 'causa_muerte':
+                pacientes = Paciente.objects.filter(causa_muerte__id=valor)
+            elif buscar_por == 'hospital':
+                pacientes = Paciente.objects.filter(hospital__id=valor)
+            else:
+                pacientes = Paciente.objects.all()
+            
+            # Preparar datos para el PDF
+            informe = [{
+                'nombre': paciente.nombre,
+                'rut': f"{paciente.rut_paciente}-{paciente.dv}",
+                'causa_muerte': paciente.causa_muerte.nombre_causa if paciente.causa_muerte else 'N/A',
+                'fecha_nacimiento': paciente.fecha_nacimiento,
+                'fecha_muerte': paciente.fecha_muerte,
+                'hospital': paciente.hospital.nombre_hospital,
+                'medico': paciente.medico.nombre if paciente.medico else 'N/A',
+                'genero': paciente.genero,
+                'edad': paciente.edad,
+                'detalles_muerte': paciente.detalles_muerte
+            } for paciente in pacientes]
 
-            if paciente:
-                # Calcular edad
-                edad = paciente.calcular_edad()
-                informe = {
-                    'nombre': paciente.nombre,
-                    'rut': f"{paciente.rut_paciente}-{paciente.dv}",
-                    'causa_muerte': paciente.causa_muerte.nombre_causa if paciente.causa_muerte else 'N/A',
-                    'fecha_nacimiento': paciente.fecha_nacimiento,
-                    'fecha_muerte': paciente.fecha_muerte,
-                    'hora_muerte': paciente.hora_muerte,
-                    'detalles_muerte': paciente.detalles_muerte,
-                    'genero': paciente.genero,
-                    'hospital': paciente.hospital.nombre_hospital,
-                    'medico': paciente.medico.nombre if paciente.medico else 'N/A',
-                    'rut_medico': f"{paciente.medico.rut_medico}-{paciente.medico.dv}" if paciente.medico else 'N/A',
-                    'edad': edad,
-                }
-    else:
-        form = BuscarPacienteForm()
+    # Obtener la plantilla para el PDF
+    template_path = 'plantilla_pdf.html'
+    context = {
+        'informe': informe,
+        'current_date': timezone.now().strftime("%Y-%m-%d %H:%M:%S")  # Agregar la fecha de generación
+    }
 
-    return render(request, 'buscar_paciente.html', {'form': form, 'informe': informe})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="informe_pacientes.pdf"'
 
+    # Crear el PDF
+    template = get_template(template_path)
+    html = template.render(context)
+    result = BytesIO()
+    pisa_status = pisa.CreatePDF(BytesIO(html.encode("UTF-8")), dest=result)
 
-def generar_pdf_informe(request):
-    # Asegúrate de que el informe esté disponible en la sesión o de alguna manera accesible
-    informe = request.session.get('informe', None)
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF', status=500)
 
-    if informe:
-        # Cargar la plantilla y renderizar el informe
-        html = render_to_string('informe_template.html', {'informe': informe})
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="informe.pdf"'
-        pisa_status = pisa.CreatePDF(html, dest=response)
-
-        if pisa_status.err:
-            return HttpResponse('Error al generar PDF')
-
-        return response
-
-    return redirect('buscar_paciente')
+    response.write(result.getvalue())
+    return response

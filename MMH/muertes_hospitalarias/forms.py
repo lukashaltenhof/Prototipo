@@ -15,13 +15,19 @@ class PacienteForm(forms.ModelForm):
             'hospital': forms.Select(attrs={'class': 'form-select'})  # Puedes agregar clases de Bootstrap aquí si quieres
         }
 
-class FiltroInformeForm(forms.Form):
-    nombre = forms.CharField(required=False)
-    rut = forms.CharField(required=False)
-    genero = forms.ChoiceField(choices=[('', 'Seleccione un género'), ('Masculino', 'Masculino'), ('Femenino', 'Femenino'), ('Otro', 'Otro')], required=False)
-    hospital = forms.ModelChoiceField(queryset=Hospital.objects.all(), required=False)
-    causa_muerte = forms.ModelChoiceField(queryset=CausaMuerte.objects.all(), required=False)
+
 
 class BuscarPacienteForm(forms.Form):
-    buscar_por = forms.ChoiceField(choices=[('rut', 'RUT'), ('nombre', 'Nombre')])
-    valor = forms.CharField(max_length=100)
+    OPCIONES_BUSQUEDA = [
+        ('rut', 'RUT'),
+        ('nombre', 'Nombre'),
+        ('causa_muerte', 'Causa de Muerte'),
+        ('hospital', 'Hospital'),
+    ]
+
+    buscar_por = forms.ChoiceField(choices=OPCIONES_BUSQUEDA, label="Buscar por")
+    valor = forms.CharField(required=False, label="Valor", widget=forms.TextInput(attrs={'placeholder': 'Ingresa un valor...'}))
+
+    # Dropdowns dinámicos para causas de muerte y hospitales
+    causa_muerte = forms.ModelChoiceField(queryset=CausaMuerte.objects.all(), required=False, label="Causa de Muerte")
+    hospital = forms.ModelChoiceField(queryset=Hospital.objects.all(), required=False, label="Hospital")
